@@ -8,8 +8,7 @@
 
 
 int main() {
-  int obraz[MAX][MAX] ; /* Stworzenie tablicy na obraz tymczasowy */
-  int wymx,wymy,odcieni;  /* Zmienne przechowujace wymiary tablicy (wymx-poziome, wymy-pionowe) i liczbe odcieni */
+  t_obraz obraz;
   int odczytano = 0;  /* Zmienna przechowujaca liczbe odczytanych pikseli */
   FILE *plikwej, *plikwyj; /* Uchwyty do pliku wejsciowego i wyjsciowego */
   char nazwa_wej[100], nazwa_wyj[100]; /* Tablice z nazwami plikow */
@@ -21,7 +20,7 @@ int main() {
   plikwej=fopen(nazwa_wej,"r");
 
   if (plikwej != NULL) {       /* co spowoduje zakomentowanie tego warunku */
-    odczytano = czytaj(plikwej,obraz,&wymx,&wymy,&odcieni);
+    odczytano = czytaj(plikwej,&obraz);
     if (odczytano==0) {
       printf("Blad odczytu pliku\n");  /* Jezeli funkcja zwroci 0 wyswietl komunikat o bledzie */
       return 0; /* Zakoncz program */
@@ -50,20 +49,20 @@ int main() {
     switch (wybor)
     {
         case 1:
-            negatyw(obraz,&wymx,&wymy,&odcieni);
-            zapisz(plikwyj,obraz,&wymx,&wymy,&odcieni,nazwa_wyj);  
+            negatyw(&obraz);
+            zapisz(plikwyj,&obraz,nazwa_wyj);  
             break;
         case 2:
-            progowanie(obraz,&wymx,&wymy,&odcieni);
-            zapisz(plikwyj,obraz,&wymx,&wymy,&odcieni,nazwa_wyj);  
+            progowanie(&obraz);
+            zapisz(plikwyj,&obraz,nazwa_wyj);  
             break;
         case 3:
-            konturowanie(obraz,&wymx,&wymy,&odcieni);
-            zapisz(plikwyj,obraz,&wymx,&wymy,&odcieni,nazwa_wyj);  
+            konturowanie(&obraz);
+            zapisz(plikwyj,&obraz,nazwa_wyj);  
             break;
         case 4:
-            polprogowanie(obraz,&wymx,&wymy,&odcieni);
-            zapisz(plikwyj,obraz,&wymx,&wymy,&odcieni,nazwa_wyj);
+            polprogowanie(&obraz);
+            zapisz(plikwyj,&obraz,nazwa_wyj);
             break;
         case 5:
             wyswietl(nazwa_wyj);
