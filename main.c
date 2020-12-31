@@ -3,10 +3,6 @@
 #include <stdlib.h>
 #include "funkcje.h"
 
-#define MAX 1024            /* Maksymalny rozmiar wczytywanego obrazu */
-
-
-
 int main() {
   t_obraz obraz;
   int odczytano = 0;  /* Zmienna przechowujaca liczbe odczytanych pikseli */

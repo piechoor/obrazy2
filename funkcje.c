@@ -3,7 +3,6 @@
 #include <stdlib.h>
 #include "funkcje.h"
 
-#define MAX 1024            /* Maksymalny rozmiar wczytywanego obrazu */
 #define DL_LINII 1024       /* Dlugosc buforow pomocniczych */
 #define DL_WIERSZA 65       /* Dlugosc wiersza elementow w zapisanym obrazie */
 
@@ -18,7 +17,7 @@
  * \return liczba wczytanych pikseli						    *
  ************************************************************************************/
 
-int czytaj(FILE *plik_we, t_obraz* obraz) {
+int czytaj(FILE *plik_we, t_obraz *obraz) {
   char buf[DL_LINII];      /* bufor pomocniczy do czytania naglowka i komentarzy */
   int znak;                /* zmienna pomocnicza do czytania komentarzy */
   int koniec=0;            /* czy napotkano koniec danych w pliku */
@@ -30,7 +29,7 @@ int czytaj(FILE *plik_we, t_obraz* obraz) {
     return(0);
   }
 
-  /* Sprawdzenie "numeru magicznego" - powinien byæ P2 */
+  /* Sprawdzenie "numeru magicznego" - powinien byc P2 */
   if (fgets(buf,DL_LINII,plik_we)==NULL)   /* Wczytanie pierwszej linii pliku do bufora */
     koniec=1;                              /* Nie udalo sie? Koniec danych! */
 
@@ -55,10 +54,14 @@ int czytaj(FILE *plik_we, t_obraz* obraz) {
     fprintf(stderr,"Blad: Brak wymiarow obrazu lub liczby stopni szarosci\n");
     return(0);
   }
-  /* Pobranie obrazu i zapisanie w tablicy obraz_pgm*/
+  
+  obraz->obraz_pgm=(int**)malloc(obraz->wymy*sizeof(int*)); /* Alokacja miejsca na tablice wskaznikow do poszczegolnych wierszy i przypisanie wskanika do obraz_pgm */
+  for (i=0;i<obraz->wymy;i++) {
+    obraz->obraz_pgm[i]=(int*)malloc(obraz->wymx*sizeof(int)); /* Stworzenie wsaznikow na wiersze i alokacja miejsca na ich elementy */
+  }
   for (i=0;i<obraz->wymy;i++) {
     for (j=0;j<obraz->wymx;j++) {
-      if (fscanf(plik_we,"%d",&(obraz_pgm[i][j]))!=1) {
+      if (fscanf(plik_we,"%d",&(obraz->obraz_pgm[i][j]))!=1) {
 	      fprintf(stderr,"Blad: Niewlasciwe wymiary obrazu\n");
 	      return(0);
       }
@@ -76,14 +79,14 @@ int czytaj(FILE *plik_we, t_obraz* obraz) {
  * \param[in] wymy wysokosc obrazka						    *
  * \param[in] szarosci liczba odcieni szarosci					    *
  ************************************************************************************/
-void zapisz(FILE *plik_wy, t_obraz* obraz, char *nazwa) {
+void zapisz(FILE *plik_wy, t_obraz *obraz, char *nazwa) {
   int i, j;
   plik_wy=fopen(nazwa,"w");   /* Otworzenie pliku w celu zapisu */
   fprintf(plik_wy,"P2\n%d %d\n%d\n",obraz->wymx,obraz->wymy,obraz->szarosci);   /* Wpsianie do pliku numeru magicznego, wymiarow i liczby odcieni */
 
   for (i=0;i<obraz->wymy;i++) {
     for (j=0;j<obraz->wymx;j++) {
-        fprintf(plik_wy,"%d ",obraz_pgm[i][j]); /* Przepisanie tablicy pikseli do pliku wyjsciowego */
+        fprintf(plik_wy,"%d ",obraz->obraz_pgm[i][j]); /* Przepisanie tablicy pikseli do pliku wyjsciowego */
         if ((j+1)%DL_WIERSZA==0)
             fprintf(plik_wy,"\n"); /* Wprowadzenie znaku nowej linii, aby liczba elementow w wierszu nie przekroczyla ustalonej wartosci */ 
     }
@@ -104,17 +107,17 @@ void wyswietl(char *n_pliku) {
 }
 
 /* Funkcja zmieniajaca kazdy element tablicy na jej negatyw. Funckja pobiera wskaznik do tablicy, jej wymiary i liczbe odcieni */
-void negatyw(t_obraz* obraz) {
+void negatyw(t_obraz *obraz) {
   int i, j;
   for (i=0;i<obraz->wymy;i++) {
     for (j=0;j<obraz->wymx;j++)
-        obraz_pgm[i][j]=obraz->szarosci-obraz_pgm[i][j];  /* Przypisanie kazdemu elementowi liczby odcieni pomniejszonej o jego wartosc */
+        obraz->obraz_pgm[i][j]=obraz->szarosci-obraz->obraz_pgm[i][j];  /* Przypisanie kazdemu elementowi liczby odcieni pomniejszonej o jego wartosc */
   }
 }
 
 /* Funkcja przeprowadza operacje progowania na tablicy, tzn. pobiera wartosc progu od uzytkownika i elementom mniejszym od progu
  przypisuje kolor czarny (0), a wiekszym bialy (obraz->szarosci). Funckja pobiera wskaznik do tablicy, jej wymiary i liczbe odcieni */
-void progowanie(t_obraz* obraz) {
+void progowanie(t_obraz *obraz) {
   int i, j;
   int prog; /* Zmienna przechowujaca wartosc progu */
 
@@ -124,10 +127,10 @@ void progowanie(t_obraz* obraz) {
   if (prog>=0&&prog<=obraz->szarosci) { /* Jezeli prog miesci sie w prawidlowym przedziale wykonaj progowanie */
     for (i=0;i<obraz->wymy;i++) {
       for (j=0;j<obraz->wymx;j++) {
-          if (obraz_pgm[i][j]<=prog)
-            obraz_pgm[i][j]=0;
+          if (obraz->obraz_pgm[i][j]<=prog)
+            obraz->obraz_pgm[i][j]=0;
           else 
-            obraz_pgm[i][j]=obraz->szarosci;
+            obraz->obraz_pgm[i][j]=obraz->szarosci;
       }
     }
   }
@@ -152,38 +155,38 @@ int roznica(int glowna, int x1, int x2) {
 Konturowanie przeprowadzane jest w czterech obszarach: 
 1. W calej tablicy bez ostatniej kolumny i wiersza. 2. W ostatniej kolumnie bez ostatiego elementu. 3. W ostatnim wierszu bez ostatniego elementu. 4. W ostatnim elemencie.
 Pobiera ona wskaznik do tablicy, jej wymiary i liczbe odcieni */
-void konturowanie(t_obraz* obraz) {
+void konturowanie(t_obraz *obraz) {
   int i,j;
   int kopiakolumny[obraz->wymy],kopiawiersza[obraz->wymx];
 
   for (i=0;i<obraz->wymy;i++) /* Stworzenie kopii przedostatniej kolumny */
-    kopiakolumny[i]=obraz_pgm[i][obraz->wymx-2];
+    kopiakolumny[i]=obraz->obraz_pgm[i][obraz->wymx-2];
   for (i=0;i<obraz->wymx;i++) /* Stworzenie kopii przedostatniego wiersza */
-    kopiawiersza[i]=obraz_pgm[obraz->wymy-2][i];
+    kopiawiersza[i]=obraz->obraz_pgm[obraz->wymy-2][i];
 
   /* Wyliczenie wartosci kolejnych elementow (pomijajac ostatni wiersz i ostatnia kolumne)
   jako polowe sumy roznic wartosci biezacego elementu oraz elementow z kolejnego wiersza i kolejnej kolumny */
   for (i=0;i<obraz->wymy-1;i++) { 
     for (j=0;j<obraz->wymx-1;j++)
-      obraz_pgm[i][j]=(roznica(obraz_pgm[i][j],obraz_pgm[i+1][j],obraz_pgm[i][j+1])/2);
+      obraz->obraz_pgm[i][j]=(roznica(obraz->obraz_pgm[i][j],obraz->obraz_pgm[i+1][j],obraz->obraz_pgm[i][j+1])/2);
   }
   /* Wylicznie wartosci dla elementow ostatniej kolumny (bez jej ostatniego elementu)
   jako polowe sumy roznic wartosci biezacego elementu oraz elementu kolejnego wiersza i kopii elementu poprzedniej kolumny */
   for (i=0;i<obraz->wymy-1;i++)
-    obraz_pgm[i][obraz->wymx-1]=(roznica(obraz_pgm[i][obraz->wymx-1],kopiakolumny[i],obraz_pgm[i+1][obraz->wymx-1])/2);
+    obraz->obraz_pgm[i][obraz->wymx-1]=(roznica(obraz->obraz_pgm[i][obraz->wymx-1],kopiakolumny[i],obraz->obraz_pgm[i+1][obraz->wymx-1])/2);
 
   /* Wylicznie wartosci dla elementow ostatniego wiersza (bez jego ostatniego elementu)
   jako polowe sumy roznic wartosci biezacego elementu oraz elementu kolejnej kolumny i kopii elementu poprzedniego wiersza */
   for (i=0;i<obraz->wymx-1;i++)
-    obraz_pgm[obraz->wymy-1][i]=(roznica(obraz_pgm[obraz->wymy-1][i],kopiawiersza[i],obraz_pgm[obraz->wymy-1][i+1])/2);
+    obraz->obraz_pgm[obraz->wymy-1][i]=(roznica(obraz->obraz_pgm[obraz->wymy-1][i],kopiawiersza[i],obraz->obraz_pgm[obraz->wymy-1][i+1])/2);
 
   /* Wylicznie wartosci dla elementu ostatniego wiersza ostatniej kolumny
   jako polowe sumy roznic wartosci biezacego elementu oraz elementu poprzedniej kolumny i poprzedniego wiersza */
-  obraz_pgm[obraz->wymy-1][obraz->wymx-1]=(roznica(obraz_pgm[obraz->wymy-1][obraz->wymx-1],kopiawiersza[obraz->wymx-1],kopiakolumny[obraz->wymy-1])/2);
+  obraz->obraz_pgm[obraz->wymy-1][obraz->wymx-1]=(roznica(obraz->obraz_pgm[obraz->wymy-1][obraz->wymx-1],kopiawiersza[obraz->wymx-1],kopiakolumny[obraz->wymy-1])/2);
 }
 
 /* Funkcja przeprowadza operacje polprogowania na elementach tablicy. Pobiera wskaznik do tablicy, jej wymiary i liczbe odcieni */
-void polprogowanie(t_obraz* obraz) {
+void polprogowanie(t_obraz *obraz) {
   int i, j;
   int zakresdolny, zakresgorny; /* Zmienne przechwoujace wartosci zakresow podanych przez uzytwkownika */
   printf("Podaj wartosc procentowa progowania do czerni: ");
@@ -197,10 +200,10 @@ void polprogowanie(t_obraz* obraz) {
     zakresgorny=((obraz->szarosci*zakresgorny)/100);
     for (i=0;i<obraz->wymy;i++) {
         for (j=0;j<obraz->wymx;j++) {
-            if (obraz_pgm[i][j]<zakresdolny)  /* Jezeli dany element jest mniejszy od zakresu, zamieniamy go na wartosc czerni */
-                obraz_pgm[i][j]=0;
-            if (obraz_pgm[i][j]>zakresgorny)  /* Jezeli dany element jest wiekszy, zmieniamy na wartosc bieli */
-                obraz_pgm[i][j]=obraz->szarosci;
+            if (obraz->obraz_pgm[i][j]<zakresdolny)  /* Jezeli dany element jest mniejszy od zakresu, zamieniamy go na wartosc czerni */
+                obraz->obraz_pgm[i][j]=0;
+            if (obraz->obraz_pgm[i][j]>zakresgorny)  /* Jezeli dany element jest wiekszy, zmieniamy na wartosc bieli */
+                obraz->obraz_pgm[i][j]=obraz->szarosci;
         }
     }
   }
