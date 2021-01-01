@@ -2,7 +2,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include "funkcje.h"
-
+ 
 int main() {
   t_obraz obraz;
   int odczytano = 0;  /* Zmienna przechowujaca liczbe odczytanych pikseli */
@@ -46,19 +46,15 @@ int main() {
     {
         case 1:
             negatyw(&obraz);
-            zapisz(plikwyj,&obraz,nazwa_wyj);  
             break;
         case 2:
-            progowanie(&obraz);
-            zapisz(plikwyj,&obraz,nazwa_wyj);  
+            progowanie(&obraz); 
             break;
         case 3:
             konturowanie(&obraz);
-            zapisz(plikwyj,&obraz,nazwa_wyj);  
             break;
         case 4:
             polprogowanie(&obraz);
-            zapisz(plikwyj,&obraz,nazwa_wyj);
             break;
         case 5:
             wyswietl(nazwa_wyj);
@@ -72,6 +68,7 @@ int main() {
     }
   } while(wybor!=6); /* Kontynuuj petle az do wybrania 6 */
 
+  zapisz(plikwyj,&obraz,nazwa_wyj);
   /* Komunikat o zapisie pliku */
   printf("Przetworzony obraz zostal zapisany jako \"%s\".\n",nazwa_wyj);
 

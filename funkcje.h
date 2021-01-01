@@ -3,7 +3,7 @@
 
 /* Struktura obrazu */
 typedef struct t_obraz {
-    int wymx, wymy, szarosci;
+    int wymx, wymy, szarosci, typ_obr;
     int **obraz_pgm;
 } t_obraz;
 
