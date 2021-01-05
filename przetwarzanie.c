@@ -4,35 +4,61 @@
 #include "funkcje.h"
 
 /* Funkcja zmieniajaca kazdy element tablicy na jej negatyw. Funckja pobiera wskaznik do tablicy, jej wymiary i liczbe odcieni */
-void negatyw(t_obraz *obraz) {
+void negatyw(t_obraz *obraz, t_opcje* wybor) {
   int i, j;
-  for (i=0;i<obraz->wymy;i++) {
-    for (j=0;j<obraz->wymx;j++)
-        obraz->obraz_pgm[i][j]=obraz->szarosci-obraz->obraz_pgm[i][j];  /* Przypisanie kazdemu elementowi liczby odcieni pomniejszonej o jego wartosc */
-  }
-}
-
-/* Funkcja przeprowadza operacje progowania na tablicy, tzn. pobiera wartosc progu od uzytkownika i elementom mniejszym od progu
- przypisuje kolor czarny (0), a wiekszym bialy (obraz->szarosci). Funckja pobiera wskaznik do tablicy, jej wymiary i liczbe odcieni */
-void progowanie(t_obraz *obraz) {
-  int i, j;
-  int prog; /* Zmienna przechowujaca wartosc progu */
-
-  printf("Podaj wartosc progowania od 0 do %d: ", obraz->szarosci); /* Komunikat o poprawnym zakresie wartosci progu */
-  scanf("%d", &prog); /* Pobranie od uzytkownika wartosci progu */
-
-  if (prog>=0&&prog<=obraz->szarosci) { /* Jezeli prog miesci sie w prawidlowym przedziale wykonaj progowanie */
+  if (obraz->typ_obr==2) {
     for (i=0;i<obraz->wymy;i++) {
-      for (j=0;j<obraz->wymx;j++) {
-          if (obraz->obraz_pgm[i][j]<=prog)
-            obraz->obraz_pgm[i][j]=0;
-          else 
-            obraz->obraz_pgm[i][j]=obraz->szarosci;
+      for (j=0;j<obraz->wymx;j++)
+          obraz->obraz_pgm[i][j]=obraz->odcieni-obraz->obraz_pgm[i][j];  /* Przypisanie kazdemu elementowi liczby odcieni pomniejszonej o jego wartosc */
+    }
+  }
+  if (obraz->typ_obr==3) {
+    printf("Dobry typ ppm\n");
+    if (wybor->czer==1) {
+      printf("Czerwony dziala\n");
+      for (i=0;i<obraz->wymy;i++) {
+        for (j=0;j<obraz->wymx;j++)
+          obraz->czer[i][j]=obraz->odcieni-obraz->czer[i][j];  /* Przypisanie kazdemu elementowi liczby odcieni pomniejszonej o jego wartosc */
+      }
+    }
+    if (wybor->ziel==1) {
+      for (i=0;i<obraz->wymy;i++) {
+        for (j=0;j<obraz->wymx;j++)
+          obraz->ziel[i][j]=obraz->odcieni-obraz->ziel[i][j];  /* Przypisanie kazdemu elementowi liczby odcieni pomniejszonej o jego wartosc */
+      }
+    }
+    if (wybor->nieb==1) {
+      for (i=0;i<obraz->wymy;i++) {
+        for (j=0;j<obraz->wymx;j++)
+          obraz->nieb[i][j]=obraz->odcieni-obraz->nieb[i][j];  /* Przypisanie kazdemu elementowi liczby odcieni pomniejszonej o jego wartosc */
       }
     }
   }
-  else
-    printf("Podano nieprawidlowy prog.\n"); /* Inaczej wyswietl komunikat o bledzie */
+
+}
+
+/* Funkcja przeprowadza operacje progowania na tablicy, tzn. pobiera wartosc progu od uzytkownika i elementom mniejszym od progu
+ przypisuje kolor czarny (0), a wiekszym bialy (obraz->odcieni). Funckja pobiera wskaznik do tablicy, jej wymiary i liczbe odcieni */
+int progowanie(t_obraz *obraz, t_opcje *opcje) {
+  int i, j;
+  int w_progu;
+
+  printf("Podaj procentowa wartosc progowania: ");
+  scanf("%d", &(opcje->prog)); /* Pobranie od uzytkownika wartosci progu */
+  if (opcje->prog>100||opcje->prog<0) {
+    printf("Podano nieprawidlowa wartosc progu.\n");
+    return 0;
+  }
+  w_progu = (opcje->prog*obraz->odcieni)/100;
+
+  for (i=0;i<obraz->wymy;i++) {
+    for (j=0;j<obraz->wymx;j++) {
+        if (obraz->obraz_pgm[i][j]<=opcje->prog)
+          obraz->obraz_pgm[i][j]=0;
+        else 
+          obraz->obraz_pgm[i][j]=obraz->odcieni;
+    }
+  }
 }
 
 /* Funkcja roznica jest funkcja pomocnicza do fuckji konturowania. Pobiera wartosc glowna i dwie wartosci wzgledne x1 i x2.
@@ -90,17 +116,17 @@ void polprogowanie(t_obraz *obraz) {
   scanf("%d",&zakresdolny); /* Pobranie dolnego zakresu */
   printf("Podaj wartosc procentowa progowania do bieli: ");
   scanf("%d",&zakresgorny); /* Pobranie gornego zakresu */
-  if(zakresdolny>zakresgorny||zakresgorny>obraz->szarosci)  /* Sprawdzenie poprawnosci podanych zakresow */
+  if(zakresdolny>zakresgorny||zakresgorny>obraz->odcieni)  /* Sprawdzenie poprawnosci podanych zakresow */
     printf("Podano nieprawidlowe wartosci.\n"); /* Jezeli sa nieprawidowe wyswietli sie komunikat o bledzie */
   else {
-    zakresdolny=((obraz->szarosci*zakresdolny)/100);  /* Zamiana wartosci procentowych na wartosci liczbowe*/
-    zakresgorny=((obraz->szarosci*zakresgorny)/100);
+    zakresdolny=((obraz->odcieni*zakresdolny)/100);  /* Zamiana wartosci procentowych na wartosci liczbowe*/
+    zakresgorny=((obraz->odcieni*zakresgorny)/100);
     for (i=0;i<obraz->wymy;i++) {
         for (j=0;j<obraz->wymx;j++) {
             if (obraz->obraz_pgm[i][j]<zakresdolny)  /* Jezeli dany element jest mniejszy od zakresu, zamieniamy go na wartosc czerni */
                 obraz->obraz_pgm[i][j]=0;
             if (obraz->obraz_pgm[i][j]>zakresgorny)  /* Jezeli dany element jest wiekszy, zmieniamy na wartosc bieli */
-                obraz->obraz_pgm[i][j]=obraz->szarosci;
+                obraz->obraz_pgm[i][j]=obraz->odcieni;
         }
     }
   }
