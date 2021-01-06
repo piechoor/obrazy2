@@ -23,17 +23,18 @@ void zapisz(FILE *plik_wy, t_obraz *obraz);
 
 void wyswietl(char *n_pliku);
 
-void negatyw(t_obraz *obraz, t_opcje *opcje);
+void negatyw(t_obraz *obraz, int **warstwa);
 
-void progowanie(t_obraz *obraz, t_opcje *opcje);
+void progowanie(t_obraz *obraz, t_opcje *wybor, int **warstwa);
 
-void konturowanie(t_obraz *obraz, t_opcje *opcje);
+void konturowanie(t_obraz *obraz, int **warstwa);
 
-void polprogowanie(t_obraz *obraz);
+void konwersjaPGM(t_obraz *obraz, t_opcje *opcje);
 
 void wyzeruj_opcje(t_opcje *wybor);
 
 int przetwarzaj_opcje(int argc, char **argv, t_opcje *wybor);
+
 
 
 #endif

@@ -118,15 +118,12 @@ int przetwarzaj_opcje(int argc, char **argv, t_opcje *wybor) {
       case 'm': {
         if (++i<argc) {
           for (j=0; argv[i][j]!='\0'; j++) {
-            if (argv[i][j]=='r') {
+            if (argv[i][j]=='r')
               wybor->czer=1;
-              printf("R:%d",wybor->czer);}
             else if (argv[i][j]=='g')
               wybor->ziel=1;
-            else if (argv[i][j]=='b') {
+            else if (argv[i][j]=='b')
               wybor->nieb=1;
-              printf("B:%d",wybor->nieb);
-            }
             else if (argv[i][j]=='s')
               wybor->szar=1;
             else
