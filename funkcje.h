@@ -18,16 +18,16 @@ typedef struct {
 } t_opcje;
 
 int czytaj(FILE *plik_we, t_obraz *obraz);
+
 void zapisz(FILE *plik_wy, t_obraz *obraz);
 
 void wyswietl(char *n_pliku);
 
 void negatyw(t_obraz *obraz, t_opcje *opcje);
 
-int progowanie(t_obraz *obraz, t_opcje *opcje);
+void progowanie(t_obraz *obraz, t_opcje *opcje);
 
-int roznica(int glowna, int x1, int x2);
-void konturowanie(t_obraz *obraz);
+void konturowanie(t_obraz *obraz, t_opcje *opcje);
 
 void polprogowanie(t_obraz *obraz);
 

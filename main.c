@@ -22,6 +22,17 @@ int main(int argc, char **argv) {
   if (opcje.negatyw==1)
     negatyw(&obraz, &opcje);
 
+  if (opcje.progowanie==1) {
+    if (opcje.prog>=0&&opcje.prog<=100)
+      progowanie(&obraz, &opcje);
+    else 
+      printf("Podano nieprawidlowa wartosc progu - progowanie nie powiodlo sie.\n");
+  }
+
+  if (opcje.konturowanie==1) {
+    konturowanie(&obraz, &opcje);
+  }
+  
   zapisz(opcje.plikwyj, &obraz);
   fclose(opcje.plikwyj);
 

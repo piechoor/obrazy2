@@ -13,7 +13,8 @@ opcje.o: opcje.c
 	gcc -c -Wall opcje.c
 
 program: obsluga.o przetwarzanie.o main.o opcje.o
-	gcc -o a.out obsluga.o przetwarzanie.o main.o opcje.o
+	gcc obsluga.o przetwarzanie.o main.o opcje.o
+	rm *.o
 
 clean:
-	rm *.o *~
+	rm *.o
