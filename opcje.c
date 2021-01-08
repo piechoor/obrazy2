@@ -15,68 +15,38 @@
 #include <stdio.h>
 #include <string.h>
 #include "funkcje.h"
-#define W_OK 0                   /* wartosc oznaczajaca brak bledow */
-#define B_NIEPOPRAWNA_OPCJA -1    /* kody bledow rozpoznawania opcji */
+#define W_OK 0                   /* Wartosc dla braku bledow */
+#define B_NIEPOPRAWNA_OPCJA -1    /* Kody poszczegolnych bledow */
 #define B_BRAKNAZWY   -2
 #define B_BRAKWARTOSCI  -3
 #define B_BRAKPLIKU   -4
 #define B_NIEPOPRAWNA_WARSTWA -5
 
-/*******************************************************/
-/* Funkcja inicjuje strukture wskazywana przez wybor   */
-/* PRE:                                                */
-/*      poprawnie zainicjowany argument wybor (!=NULL) */
-/* POST:                                               */
-/*      "wyzerowana" struktura wybor wybranych opcji   */
-/*******************************************************/
-
 void wyzeruj_opcje(t_opcje * wybor) {
-  wybor->plikwej=NULL;
-  wybor->plikwyj=NULL;
-  wybor->negatyw=0;
-  wybor->konturowanie=0;
-  wybor->progowanie=0;
-  wybor->gamma=0;
-  wybor->wyswietlenie=0;
-  wybor->czer=0;
-  wybor->ziel=0;
-  wybor->nieb=0;
-  wybor->szar=0;
+  if (wybor==NULL)
+    printf("Blad asercji: Procedura wyzeruj_opcje.\n");
+  else {
+    wybor->plikwej=NULL;
+    wybor->plikwyj=NULL;
+    wybor->negatyw=0;
+    wybor->konturowanie=0;
+    wybor->progowanie=0;
+    wybor->wyswietlenie=0;
+    wybor->czer=0;
+    wybor->ziel=0;
+    wybor->nieb=0;
+    wybor->szar=0;
+  }
 }
-
-/************************************************************************/
-/* Funkcja rozpoznaje opcje wywolania programu zapisane w tablicy argv  */
-/* i zapisuje je w strukturze wybor                                     */
-/* Skladnia opcji wywolania programu                                    */
-/*         program {[-i nazwa] [-o nazwa] [-p liczba] [-n] [-r] [-d] }  */
-/* Argumenty funkcji:                                                   */
-/*         argc  -  liczba argumentow wywolania wraz z nazwa programu   */
-/*         argv  -  tablica argumentow wywolania                        */
-/*         wybor -  struktura z informacjami o wywolanych opcjach       */
-/* PRE:                                                                 */
-/*      brak                                                            */
-/* POST:                                                                */
-/*      funkcja otwiera odpowiednie pliki, zwraca uchwyty do nich       */
-/*      w strukturze wybór, do tego ustawia na 1 pola dla opcji, ktore  */
-/*	poprawnie wystapily w linii wywolania programu,                 */
-/*	pola opcji nie wystepujacych w wywolaniu ustawione sa na 0;     */
-/*	zwraca wartosc W_OK (0), gdy wywolanie bylo poprawne            */
-/*	lub kod bledu zdefiniowany stalymi B_* (<0)                     */
-/* UWAGA:                                                               */
-/*      funkcja nie sprawdza istnienia i praw dostepu do plikow         */
-/*      w takich przypadkach zwracane uchwyty maja wartosc NULL         */
-/************************************************************************/
 
 int przetwarzaj_opcje(int argc, char **argv, t_opcje *wybor) {
   int i, j, w_progu;
 
   wyzeruj_opcje(wybor);
   wybor->plikwyj=stdout;        /* na wypadek gdy nie podano opcji "-o" */
-
   for (i=1; i<argc; i++) {
     if (argv[i][0] != '-')  /* blad: to nie jest opcja - brak znaku "-" */
         return B_NIEPOPRAWNA_OPCJA;
-      
     switch (argv[i][1]) {
       case 'i': {                 /* opcja z nazwa pliku wejsciowego */
         if (++i<argc) {   /* wczytujemy kolejny argument jako nazwe pliku */
@@ -115,7 +85,7 @@ int przetwarzaj_opcje(int argc, char **argv, t_opcje *wybor) {
 	      return B_BRAKWARTOSCI;             /* blad: brak wartosci progu */
         break;
       }
-      case 'm': {
+      case 'm': {           /* opcja wyboru warstwy albo konwersji do szarosci */
         if (++i<argc) {
           for (j=0; argv[i][j]!='\0'; j++) {
             if (argv[i][j]=='r')
@@ -127,11 +97,11 @@ int przetwarzaj_opcje(int argc, char **argv, t_opcje *wybor) {
             else if (argv[i][j]=='s')
               wybor->szar=1;
             else
-              return B_NIEPOPRAWNA_WARSTWA;
+              return B_NIEPOPRAWNA_WARSTWA;   /* blad nierozpoznanej warstwy */
           }
         }
         else
-          return B_BRAKWARTOSCI;
+          return B_BRAKWARTOSCI;    /* blad braku podanej warstwy */
         break;
       }
       case 'n': {                 /* mamy wykonac negatyw */
@@ -144,10 +114,6 @@ int przetwarzaj_opcje(int argc, char **argv, t_opcje *wybor) {
       }
       case 'd': {                 /* mamy wyswietlic obraz */
         wybor->wyswietlenie=1;
-        break;
-      }
-      case 'g': {
-        wybor->gamma=1;
         break;
       }
       default:                    /* nierozpoznana opcja */

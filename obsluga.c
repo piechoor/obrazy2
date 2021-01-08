@@ -6,17 +6,6 @@
 #define DL_LINII 1024       /* Dlugosc buforow pomocniczych */
 #define DL_WIERSZA 15       /* Dlugosc wiersza elementow w zapisanym obrazie */
 
-/************************************************************************************
- * Funkcja wczytuje obraz PGM z pliku do tablicy       	       	       	       	    *
- *										    *
- * \param[in] plik_we uchwyt do pliku z obrazem wejsciowym w formacie PGM			    *
- * \param[out] obraz_pgm tablica, do ktorej zostanie zapisany obraz		    *
- * \param[out] wymx szerokosc obrazka						    *
- * \param[out] wymy wysokosc obrazka						    *
- * \param[out] odcieni liczba odcieni odcieni					    *
- * \return liczba wczytanych pikseli						    *
- ************************************************************************************/
-
 int czytaj(FILE *plik_we, t_obraz *obraz) {
   char buf[DL_LINII];      /* bufor pomocniczy do czytania naglowka i komentarzy */
   int znak;                /* zmienna pomocnicza do czytania komentarzy */
@@ -32,7 +21,7 @@ int czytaj(FILE *plik_we, t_obraz *obraz) {
   if (fgets(buf,DL_LINII,plik_we)==NULL)   /* Wczytanie pierwszej linii pliku do bufora */
     koniec=1;                              /* Nie udalo sie? Koniec danych! */
 
-  /* Sprawdzenie "numeru magicznego" dla pliku PGM/PPM - powinien byc P2/P3 */
+  /* Ustalenie formatu obrazu PGM/PPM - oznaczenie poczatkowe powinno byc P2/P3 */
   if (buf[0]=='P' && buf[1]=='2')
     obraz->typ_obr=2;
 
@@ -67,7 +56,7 @@ int czytaj(FILE *plik_we, t_obraz *obraz) {
     for (i=0;i<obraz->wymy;i++) {
       obraz->obraz_pgm[i]=(int*)malloc(obraz->wymx*sizeof(int)); /* Stworzenie wsaznikow na wiersze i alokacja miejsca na ich elementy */
     }
-    for (i=0;i<obraz->wymy;i++) {
+    for (i=0;i<obraz->wymy;i++) {   /* Zapisanie tablicy wartosciami pikseli obrazu PGM */
       for (j=0;j<obraz->wymx;j++) {
         if (fscanf(plik_we,"%d",&(obraz->obraz_pgm[i][j]))!=1) {
 	        fprintf(stderr,"Blad: Niewlasciwe wymiary obrazu\n");
@@ -79,17 +68,17 @@ int czytaj(FILE *plik_we, t_obraz *obraz) {
 
   /* Dynamiczne zaalokowanie pamieci dla obrazu PPM */
   if (obraz->typ_obr==3) {
-    obraz->czer=(int**)malloc(obraz->wymy*sizeof(int*));
+    obraz->czer=(int**)malloc(obraz->wymy*sizeof(int*));  /* Alokacja miejsca na tablice wskaznikow do poszczegolnych wierszy i przypisanie wskanika do czer, ziel i nieb */
     obraz->ziel=(int**)malloc(obraz->wymy*sizeof(int*));
     obraz->nieb=(int**)malloc(obraz->wymy*sizeof(int*));
 
     for (i=0;i<obraz->wymy;i++) {
-      obraz->czer[i]=(int*)malloc(obraz->wymx*sizeof(int));
+      obraz->czer[i]=(int*)malloc(obraz->wymx*sizeof(int));   /* Stworzenie wsaznikow na wiersze i alokacja miejsca na ich elementy */
       obraz->ziel[i]=(int*)malloc(obraz->wymx*sizeof(int));
       obraz->nieb[i]=(int*)malloc(obraz->wymx*sizeof(int));
     }
 
-    for (i=0;i<obraz->wymy;i++) {
+    for (i=0;i<obraz->wymy;i++) {   /* Pobranie wartosci pikseli do poszczegolnych tablic */
       for (j=0;j<obraz->wymx;j++)
         fscanf(plik_we,"%d %d %d",&(obraz->czer[i][j]),&(obraz->ziel[i][j]),&(obraz->nieb[i][j]));
     }
@@ -97,15 +86,6 @@ int czytaj(FILE *plik_we, t_obraz *obraz) {
   return obraz->wymx*obraz->wymy;   /* Czytanie zakonczone sukcesem    */
 }                       /* Zwroc liczbe wczytanych pikseli */
 
-/************************************************************************************
- * Funkcja zapisuje obraz PGM z pliku do tablicy       	       	       	       	    *
- *										    *
- * \param[in] plik_wy uchwyt do pliku z obrazem wyjsciowym w formacie PGM			    *
- * \param[in] obraz_pgm tablica, do ktorej zostanie zapisany obraz		    *
- * \param[in] wymx szerokosc obrazka						    *
- * \param[in] wymy wysokosc obrazka						    *
- * \param[in] odcieni liczba odcieni odcieni					    *
- ************************************************************************************/
 void zapisz(FILE *plik_wy, t_obraz *obraz) {
   int i, j;
 
@@ -153,8 +133,7 @@ void zapisz(FILE *plik_wy, t_obraz *obraz) {
   }
   
 }
- 
-/* Wyswietlenie obrazu o zadanej nazwie za pomoca programu "display" */
+
 void wyswietl(char *n_pliku) {
   char polecenie[DL_LINII];      /* bufor pomocniczy do zestawienia polecenia */
 
